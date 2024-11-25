@@ -104,6 +104,12 @@ invalid_option:
     la $a0, error
     syscall
     
+    li $a0, 101
+    li $v0, 1
+    syscall
+    li $v0, 4
+    la $a0, return
+    syscall
     li $v0, 4
     la $a0, opcionInvalida
     syscall
