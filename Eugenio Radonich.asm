@@ -387,7 +387,7 @@ prevcategory:
 delcategory:
     # Verificar si hay una categoría seleccionada
     lw $t0, wclist      # Cargar la categoría seleccionada
-    beqz $t0, error501
+    beqz $t0, error401
 
     # Obtener la lista de objetos asociada a la categoría
     lw $t1, 4($t0)      # Cargar el puntero a la lista de objetos
@@ -402,16 +402,16 @@ deleteObjectsLoop:
 
 skipObjectDeletion:
     # Ajustar los punteros de las categorías
-    lw $t3, 0($t0)      # Cargar el puntero `prev` de la categoría
-    lw $t4, 4($t0)      # Cargar el puntero `next` de la categoría
+    lw $t3, 0($t0)      # Cargar el puntero anterior de la categoría
+    lw $t4, 4($t0)      # Cargar el puntero siguiente de la categoría
 
-    # Actualizar el `next` del nodo anterior
-    beqz $t3, updateNextPointer  # Si no hay nodo anterior, saltar
+    # Actualizar al siguiente del nodo anterior
+    beqz $t3, updateNextPointer  # ? no hay nodo anterior, saltar
     sw $t4, 4($t3)
 
 updateNextPointer:
     # Actualizar el `prev` del nodo siguiente
-    beqz $t4, finalizeCategoryDeletion  # Si no hay nodo siguiente, saltar
+    beqz $t4, finalizeCategoryDeletion  # ? no hay nodo siguiente, saltar
     sw $t3, 0($t4)
 
 finalizeCategoryDeletion:
@@ -426,13 +426,19 @@ finalizeCategoryDeletion:
     la $a0, successDeleteCategory
     li $v0, 4
     syscall
+# Regresar al punto de llamada
+    jr $ra              
 
-    jr $ra              # Regresar al punto de llamada
-
- error501:
+ error401:
  	li $v0, 4
  	la $a0, error
  	syscall
+	li $a0,401
+	li $v0, 1
+	syscall
+	li $v0, 4
+	la $a0, return
+	syscall
 delobject:    
     # Implementar lógica para borrar objeto
     jr $ra
