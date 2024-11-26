@@ -391,51 +391,10 @@ prevcategory:
    
    j endselectcat
 delcategory:
-    # Verificar si hay una categoría seleccionada
-    lw $t0, wclist      # Cargar la categoría seleccionada
-    beqz $t0, error401
-
-    # Obtener la lista de objetos asociada a la categoría
-    lw $t1, 4($t0)      # Cargar el puntero a la lista de objetos
-    beqz $t1, skipObjectDeletion  # Si no hay objetos, saltar al siguiente paso
-
-deleteObjectsLoop:
-    lw $t2, 4($t1)      # Obtener el siguiente objeto en la lista
-    move $a0, $t1       # Pasar el puntero del objeto actual a sfree
-    jal sfree           # Llamar a la función sfree para liberar el objeto
-    move $t1, $t2       # Avanzar al siguiente objeto
-    bnez $t1, deleteObjectsLoop  # Repetir si aún hay objetos
-
-skipObjectDeletion:
-    # Ajustar los punteros de las categorías
-    lw $t3, 0($t0)      # Cargar el puntero anterior de la categoría
-    lw $t4, 4($t0)      # Cargar el puntero siguiente de la categoría
-
-    # Actualizar al siguiente del nodo anterior
-    beqz $t3, updateNextPointer  # ? no hay nodo anterior, saltar
-    sw $t4, 4($t3)
-
-updateNextPointer:
-    # Actualizar el `prev` del nodo siguiente
-    beqz $t4, finalizeCategoryDeletion  # ? no hay nodo siguiente, saltar
-    sw $t3, 0($t4)
-
-finalizeCategoryDeletion:
-    move $a0, $t0       # Pasar el puntero de la categoría seleccionada a sfree
-    jal sfree           # Llamar a la función sfree para liberar la categoría
-
-    # Restablecer el puntero de categoría seleccionada
-    li $t0, 0           # wclist = NULL
-    sw $t0, wclist
-
-    # Mostrar mensaje de éxito solo una vez
-    la $a0, successDeleteCategory
-    li $v0, 4
-    syscall
-# Regresar al punto de llamada
-    jr $ra              
-
- error401:
+   lw $t0, wclist
+   beqz $t0, error401
+	jr $ra
+error401:
  	li $v0, 4
  	la $a0, error
  	syscall
@@ -445,8 +404,18 @@ finalizeCategoryDeletion:
 	li $v0, 4
 	la $a0, return
 	syscall
+	jr $ra
 delobject:    
-    # Implementar lógica para borrar objeto
+    li $v0, 4
+    la $a0, error
+    syscall
+    li $a0, 701
+    li $v0,1
+    syscall
+    
+    li $v0, 4
+    la $a0, return
+    syscall
     jr $ra
 addobject:
     addiu $sp, $sp, -8
